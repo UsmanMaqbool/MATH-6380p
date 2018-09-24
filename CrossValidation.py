@@ -1,7 +1,7 @@
 from sklearn.model_selection import LeaveOneOut
 from sklearn.model_selection import GroupKFold
 from sklearn.model_selection import StratifiedKFold
-from sklearn.cross_validation import cross_val_score
+from sklearn.model_selection import cross_val_score
 
 from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
@@ -35,7 +35,8 @@ def CrossValidation (X,y,groups):
     for estimator in est.keys():
         scorces[estimator] = dict()
         for cv in CVM.keys():
-            scorces[estimator][cv] = cross_val_score(estimator=est[estimator],X=X,y=y,cv=CVM[cv],scoring='roc_auc')
+            scorces[estimator][cv] = np.average(cross_val_score(estimator=est[estimator],X=X,y=y,
+                                                                cv=CVM[cv],scoring='roc_auc'))
 
     df = pd.DataFrame(scorces.items)
     df.transpose()
