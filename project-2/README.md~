@@ -1,0 +1,21 @@
+DCFNet-Pytorch
+============================
+This repository is the pytorch implementation for ICML 2018 paper DCFNet: Deep Neural Network with Decomposed Convolutional Filters
+
+For details please refer to [paper](https://arxiv.org/pdf/1802.04145.pdf).
+
+The code for VGG borrows heavily from [torchvision](https://pytorch.org/docs/stable/torchvision/index.html).
+
+**Docker on system Run**
+```
+docker start usman_ws
+nvidia-docker run -it --name usman_math -v /media/leo/0287D1936157598A/docker_ws/docker_ws:/app pytorch/pytorch:0.4.1-cuda9-cudnn7-runtime /bin/bash
+nvidia-docker exec -it usman_math /bin/bash
+```
+
+**Access to the server**
+```
+ssh usman@ee4e099.ece.ust.hk
+cd /data_shared/Docker/usman/tencent-ml-images
+```
+
