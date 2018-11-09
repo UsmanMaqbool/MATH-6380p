@@ -29,4 +29,4 @@ def plot_csv(traincsv, valcsv):
 
 
     
-plot_csv("./train_vgg.vgg16_bn_256_0.1_0.9_0.003_0.0001.csv","./val_vgg.vgg16_bn_256_0.1_0.9_0.003_0.0001.csv")
+# plot_csv("./train_vgg.vgg16_bn_256_0.1_0.9_0.003_0.0001.csv","./val_vgg.vgg16_bn_256_0.1_0.9_0.003_0.0001.csv")
