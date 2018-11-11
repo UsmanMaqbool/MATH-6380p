@@ -243,7 +243,7 @@ model =  model.cuda()
 trainset = datasets.CIFAR10('./CIFAR10', download=True, train=True, transform=transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize((0.1307,), (0.3081,))]))
-train_loader = DataLoader(trainset, batch_size=256, shuffle=True)
+train_loader = DataLoader(trainset, batch_size=200, shuffle=True)
 val_data = datasets.CIFAR10('./CIFAR10', download=True, train=False, transform=transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize((0.1307,), (0.3081,))]))
