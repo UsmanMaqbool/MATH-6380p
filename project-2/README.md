@@ -10,13 +10,13 @@ The code for VGG borrows heavily from [torchvision](https://pytorch.org/docs/sta
 * `main-lasted.py` is the main file, which has configuration for all models, Resnet, DCF-Based Resnet, VGG and DCF-Based VGG.
 ```
 python main-lasted.py
-
 ```
-* To plot, just use `plotcsv.py`.
+* **To plot**, just use `plotcsv.py`.
 
+###VGG Comparison
 ![VGG Comparison](vgg.vgg16_bn_256_0.1_0.9_0.003_0.0001join.png)
 
-
+### ResNet Comparison
 ![ResNet Comparison](resnet.resnet18_256_0.1_0.9_0.003_0.001join.png)
 #### Docker Image with Pytorch-0.4.1-cuda9-cudnn7
 
