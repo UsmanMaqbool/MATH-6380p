@@ -13,7 +13,7 @@ python main-lasted.py
 ```
 * **To plot**, just use `plotcsv.py`.
 
-###VGG Comparison
+### VGG Comparison
 ![VGG Comparison](vgg.vgg16_bn_256_0.1_0.9_0.003_0.0001join.png)
 
 ### ResNet Comparison
