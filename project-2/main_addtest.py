@@ -21,7 +21,7 @@ import resnet
 import sys
 from plotcsv import plot_csv
 
-#model = vgg.vgg16_bn, resnet.resnet18, dcfresnet.resnet18, dcfnet.vgg16_bn
+
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('--model', default="dcfresnet.resnet18", type=str, metavar='N',
                     help='')
@@ -31,15 +31,15 @@ parser.add_argument('--epochs', default=15, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
-parser.add_argument('-b', '--batch-size', default=256, type=int,
+parser.add_argument('-b', '--batch-size', default=128, type=int,
                     metavar='N', help='mini-batch size (default: 256)')
-parser.add_argument('--lr', '--learning-rate', default=1e-1, type=float,
+parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum')
 parser.add_argument('--loss_weight', default=0.003, type=float, metavar='LW',
                     help='loss weight')
-parser.add_argument('--weight_decay', '--wd', default=1e-3, type=float,
+parser.add_argument('--weight_decay', '--wd', default=1e-4, type=float,
                     metavar='W', help='weight decay (default: 1e-4)')
 parser.add_argument('--print-freq', '-p', default=10, type=int,
                     metavar='N', help='print frequency (default: 10)')
@@ -87,12 +87,11 @@ def accuracy(output, target, topk=(1,)):
         res.append(correct_k.mul_(100.0 / batch_size))
     return res
 
-
-def save_checkpoint(state, is_best, filenames):
+def save_checkpoint(state,is_best,filename):
     filename=filenames
     torch.save(state, filename)
     if is_best:
-        shutil.copyfile(filename, filename + '_model_best.pth.tar')
+        shutil.copyfile(filename, filename+'model_best.pth.tar')
 
 def train(model,train_loader,criterion,optimizer,epoch,use_cuda):
     print("Training... Epoch = %d" % epoch)
@@ -211,7 +210,6 @@ def validate(val_loader, model, criterion, use_cuda):
 
 
 
-global args, best_prec1
 
 args = parser.parse_args()
 filename = args.model + "_" + str(args.batch_size)  + "_" + str(args.lr)  + "_" + str(args.momentum)  + "_" + str(args.loss_weight)  + "_" + str(args.weight_decay)
@@ -224,37 +222,45 @@ if os.path.exists(root+"train_"+filename +".csv"):
     sys.exit(0)
 
 best_prec1 = 0
+'''
 if args.model == "vgg.vgg16_bn":
     model = vgg.vgg16_bn()
 if args.model == "resnet.resnet18":
     model = resnet.resnet18(pretrained=False)
 if args.model == "dcfresnet.resnet18":
-    model = dcfresnet.resnet18(pretrained=False)
+    model = dcfresnet.resnet18()
 if args.model == "dcfnet.vgg16_bn":
     model = dcfnet.vgg16_bn(pretrained=False)
-
+'''
 #exec("model = %s(pretrained=False)" % args.model)
 
 #model = vgg.vgg16_bn()
-# model = resnet.resnet18(pretrained=False)
-# model = dcfresnet.resnet18(pretrained=False)
-# model = dcfnet.vgg16_bn(pretrained=False)
+#model = resnet.resnet18(pretrained=False)
+model = dcfresnet.resnet18(pretrained=False)
+#model = dcfnet.vgg16_bn(pretrained=False)
 model =  model.cuda()
 #print(model.features.children())
 
 trainset = datasets.CIFAR10('./CIFAR10', download=True, train=True, transform=transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize((0.1307,), (0.3081,))]))
-train_loader = DataLoader(trainset, batch_size=200, shuffle=True)
+train_loader = DataLoader(trainset, batch_size=128, shuffle=True)
+
 val_data = datasets.CIFAR10('./CIFAR10', download=True, train=False, transform=transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize((0.1307,), (0.3081,))]))
 val_loader = DataLoader(val_data, batch_size=200, shuffle=False)
+	
+lengths = 300
+test_data = torch.utils.data.random_split(val_data, lengths)
+test_loader = DataLoader(test_data, batch_size=100, shuffle=False)
+
 
 nllloss = nn.NLLLoss().cuda()  # CrossEntropyLoss = log_softmax + NLLLoss
 
 criterion = nllloss
-optimizer = optim.SGD(filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
+
+optimizer = optim.SGD(  filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr, momentum=args.momentum, weight_decay=args.weight_decay)
 sheduler = lr_scheduler.StepLR(optimizer, 1, gamma=0.95)  # 30 0.1
 
 if args.evaluate:
@@ -262,6 +268,7 @@ if args.evaluate:
 
 traininf = []
 valinf = []
+testinf = []
 
 for epoch in range(args.start_epoch, args.epochs):
     sheduler.step()
@@ -274,6 +281,8 @@ for epoch in range(args.start_epoch, args.epochs):
     # remember best prec@1 and save checkpoint
     is_best = prec1 > best_prec1
     best_prec1 = max(prec1, best_prec1)
+    
+    
 
     save_checkpoint({
         'epoch': epoch + 1,
@@ -282,8 +291,11 @@ for epoch in range(args.start_epoch, args.epochs):
         'best_prec1': best_prec1,
         'optimizer': optimizer.state_dict(),
     }, is_best,filename)
+    
+    
 
-
+test_prec1,test_logs = validate(test_loader, model, criterion, True)
+testinf.append(test_logs)
 
 #trainf = pd.DataFrame(train_logs)
 #valf = pd.DataFrame(val_logs)
@@ -291,12 +303,12 @@ trainlogs = pd.concat(traininf)
 print(trainlogs)
 valogs = pd.concat(valinf)
 print(valogs)
-
-
-
+testlogs = pd.concat(testinf)
 
 trainlogs.to_csv(root+"train_"+filename +".csv", encoding='utf-8')
 valogs.to_csv(root+"val_"+filename+".csv", encoding='utf-8')
-
+testlogs.to_csv(root+"test_"+filename+".csv", encoding='utf-8')
 
 plot_csv(root+"train_"+filename +".csv",root+"val_"+filename+".csv" )
+plot_csv(root+"train_"+filename +".csv",root+"test_"+filename+".csv" )
+
